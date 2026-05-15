@@ -1,13 +1,61 @@
-# @package _global_
-# Inherit from base.yaml and override source/target dataset fields
-defaults:
-  - base.yaml
+# # Inherit from base.yaml and override source/target dataset fields
+# defaults:
+#   - base.yaml
+
+# seed: 42  # Add this here
+# source:
+#   dataset: "market1501"
+#   data_root: "/mnt/AIProjects/trinh/DATA/reid/Market1501"
+#   num_classes: 751
+
+# target:
+#   dataset: "dukemtmc"
+#   data_root: "/mnt/AIProjects/trinh/DATA/reid/DukeMTMC-reID"
+
 
 source:
   dataset: "market1501"
-  data_root: "data/raw/market1501"
+  data_root: "/mnt/AIProjects/trinh/DATA/reid/Market1501"
   num_classes: 751
+  batch_size: 64
+  num_epochs: 60
+  lr: 0.00035
+  backbone: "resnet50"
+  pretrained: true
+  output_dir: "outputs/source_model"
 
 target:
   dataset: "dukemtmc"
-  data_root: "data/raw/dukemtmc"
+  data_root: "/mnt/AIProjects/trinh/DATA/reid/DukeMTMC-reID"
+  batch_size: 64
+  num_epochs: 40
+  lr: 0.00035
+  output_dir: "outputs/adapted_model"
+
+clustering:
+  eps: 0.6
+  min_samples: 4
+  distance_metric: "euclidean"
+  camera_weight: 0.3
+  recluster_every: 1  # epochs
+
+memory_bank:
+  size: 16384
+  momentum: 0.999
+  temperature: 0.07
+
+loss:
+  lambda_contrastive: 1.0
+  lambda_entropy: 0.1
+  lambda_camera: 0.05
+
+theory:
+  compute_bound: true
+  bound_delta: 0.05  # confidence parameter (1 - delta)
+  h_divergence_sample_size: 5000
+
+seed: 42
+device: "cuda"
+num_workers: 8
+log_every: 50
+eval_every: 5

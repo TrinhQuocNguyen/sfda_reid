@@ -27,6 +27,10 @@ class MSMT17(Dataset):
         self.img_paths, self.pids, self.camids = self._parse_list()
         self.pid_set = set([pid for pid in self.pids if pid >= 0])
         self.camid_set = set(self.camids)
+        
+        # Build pid to label mapping (remap to [0, num_classes))
+        unique_pids = sorted(self.pid_set)
+        self.pid2label = {pid: idx for idx, pid in enumerate(unique_pids)}
 
     def _parse_list(self):
         if self.mode == 'train':
@@ -54,9 +58,12 @@ class MSMT17(Dataset):
         img = Image.open(self.img_paths[idx]).convert('RGB')
         if self.transform:
             img = self.transform(img)
+        pid = self.pids[idx]
+        # Remap pid to label for training
+        label = self.pid2label.get(pid, pid) if pid >= 0 else pid
         return {
             'image': img,
-            'pid': self.pids[idx],
+            'pid': label,
             'camid': self.camids[idx],
             'img_path': self.img_paths[idx]
         }

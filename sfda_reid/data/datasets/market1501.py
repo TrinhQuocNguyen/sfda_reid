@@ -26,6 +26,10 @@ class Market1501(Dataset):
         self.samples = self._parse_samples()
         self.pid_set = set([s['pid'] for s in self.samples if s['pid'] >= 0])
         self.camid_set = set([s['camid'] for s in self.samples])
+        
+        # Build pid to label mapping (remap to [0, num_classes))
+        unique_pids = sorted(self.pid_set)
+        self.pid2label = {pid: idx for idx, pid in enumerate(unique_pids)}
 
     def _get_img_paths(self) -> List[str]:
         if self.mode == 'train':
@@ -67,9 +71,12 @@ class Market1501(Dataset):
         img = Image.open(sample['img_path']).convert('RGB')
         if self.transform:
             img = self.transform(img)
+        pid = sample['pid']
+        # Remap pid to label for training
+        label = self.pid2label.get(pid, pid) if pid >= 0 else pid
         return {
             'image': img,
-            'pid': sample['pid'],
+            'pid': label,
             'camid': sample['camid'],
             'img_path': sample['img_path']
         }

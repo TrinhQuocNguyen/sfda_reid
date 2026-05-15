@@ -35,23 +35,75 @@ def main():
     parser.add_argument('--phase', type=str, choices=['source'], required=True)
     args = parser.parse_args()
     cfg = OmegaConf.load(args.config)
+    print(OmegaConf.to_yaml(cfg))
     set_seed(cfg.seed)
     logger = setup_logger('train', save_dir=cfg.source.output_dir)
     device = torch.device(cfg.device)
+    
+    logger.info("=" * 80)
+    logger.info("TRAINING SCRIPT STARTED")
+    logger.info("=" * 80)
+    logger.info(f"Config file: {args.config}")
+    logger.info(f"Training phase: {args.phase}")
+    logger.info(f"Random seed: {cfg.seed}")
+    logger.info(f"Device: {device}")
+    
     # Build datasets
+    logger.info("\n" + "=" * 80)
+    logger.info("BUILDING DATASETS")
+    logger.info("=" * 80)
+    logger.info(f"Loading {cfg.source.dataset} training set from {cfg.source.data_root}")
     train_set = get_dataset(cfg.source.dataset, cfg.source.data_root, 'train', get_train_transforms())
+    logger.info(f"Training set loaded: {len(train_set)} samples")
+    
+    logger.info(f"Loading {cfg.source.dataset} validation set from {cfg.source.data_root}")
     val_set = get_dataset(cfg.source.dataset, cfg.source.data_root, 'gallery', get_test_transforms())
+    logger.info(f"Validation set loaded: {len(val_set)} samples")
+    
     # Build loaders
+    logger.info("\n" + "=" * 80)
+    logger.info("BUILDING DATA LOADERS")
+    logger.info("=" * 80)
     train_loader = build_train_loader(train_set, cfg)
     val_loader = build_test_loader(val_set, cfg)
+    logger.info(f"Train loader: {len(train_loader)} batches of size {cfg.source.batch_size}")
+    logger.info(f"Val loader: {len(val_loader)} batches of size 256")
+    
     # Build model
+    logger.info("\n" + "=" * 80)
+    logger.info("BUILDING MODEL")
+    logger.info("=" * 80)
+    logger.info(f"Model backbone: {cfg.source.backbone}")
+    logger.info(f"Pretrained: {cfg.source.pretrained}")
+    logger.info(f"Number of classes: {cfg.source.num_classes}")
+    
     if cfg.source.backbone == 'resnet50':
         model = ResNet50Backbone(num_classes=cfg.source.num_classes, pretrained=cfg.source.pretrained).to(device)
+        logger.info("ResNet50 backbone created")
     else:
         model = ViTBackbone(num_classes=cfg.source.num_classes, pretrained=cfg.source.pretrained).to(device)
+        logger.info("ViT backbone created")
+    
+    # Count parameters
+    total_params = sum(p.numel() for p in model.parameters())
+    trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    logger.info(f"Total parameters: {total_params:,}")
+    logger.info(f"Trainable parameters: {trainable_params:,}")
+    
     # Trainer
+    logger.info("\n" + "=" * 80)
+    logger.info("INITIALIZING TRAINER")
+    logger.info("=" * 80)
     trainer = SourceTrainer(model, train_loader, val_loader, cfg)
+    
+    logger.info("\n" + "=" * 80)
+    logger.info("STARTING TRAINING")
+    logger.info("=" * 80)
     trainer.train()
+    
+    logger.info("\n" + "=" * 80)
+    logger.info("TRAINING COMPLETED")
+    logger.info("=" * 80)
     logger.info('Training complete.')
 
 if __name__ == '__main__':

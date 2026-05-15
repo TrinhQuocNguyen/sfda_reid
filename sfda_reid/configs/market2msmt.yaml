@@ -5,9 +5,9 @@ defaults:
 
 source:
   dataset: "market1501"
-  data_root: "data/raw/market1501"
+  data_root: "/mnt/AIProjects/trinh/DATA/reid/market1501"
   num_classes: 751
 
 target:
   dataset: "msmt17"
-  data_root: "data/raw/msmt17"
+  data_root: "/mnt/AIProjects/trinh/DATA/reid/MSMT17_V1"

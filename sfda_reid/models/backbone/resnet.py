@@ -34,3 +34,10 @@ class ResNet50Backbone(nn.Module):
         feat = self.base(x)
         pooled = self.gap(feat).view(x.size(0), -1)
         return pooled
+
+    def forward_inference(self, x: torch.Tensor) -> torch.Tensor:
+        """Inference mode: returns BNNeck features for evaluation."""
+        feat = self.base(x)
+        pooled = self.gap(feat).view(x.size(0), -1)
+        bn_feat = self.bnneck(pooled)
+        return bn_feat

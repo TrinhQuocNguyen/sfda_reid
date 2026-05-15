@@ -1,5 +1,5 @@
 # Ignore raw datasets and outputs
-/data/raw/
+//mnt/AIProjects/trinh/DATA/reid/
 /outputs/
 __pycache__/
 .DS_Store

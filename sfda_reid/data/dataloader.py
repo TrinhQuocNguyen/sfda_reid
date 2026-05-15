@@ -20,6 +20,9 @@ class RandomIdentitySampler(Sampler):
         index_dic = {}
         for idx, sample in enumerate(self.data_source.samples):
             pid = sample['pid']
+            # Skip invalid pids (junk=-1, distractor=0)
+            if pid < 1:
+                continue
             if pid not in index_dic:
                 index_dic[pid] = []
             index_dic[pid].append(idx)

@@ -5,9 +5,9 @@ defaults:
 
 source:
   dataset: "dukemtmc"
-  data_root: "data/raw/dukemtmc"
+  data_root: "/mnt/AIProjects/trinh/DATA/reid/DukeMTMC-reID"
   num_classes: 702
 
 target:
   dataset: "market1501"
-  data_root: "data/raw/market1501"
+  data_root: "/mnt/AIProjects/trinh/DATA/reid/Market1501"

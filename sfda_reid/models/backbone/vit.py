@@ -40,3 +40,13 @@ class ViTBackbone(nn.Module):
             return feat[:, 1:, :].mean(dim=1)
         else:
             return feat[:, 0]
+
+    def forward_inference(self, x: torch.Tensor) -> torch.Tensor:
+        """Inference mode: returns BNNeck features for evaluation."""
+        feat = self.model.forward_features(x)
+        if self.use_patch_avg:
+            pooled = feat[:, 1:, :].mean(dim=1)
+        else:
+            pooled = feat[:, 0]
+        bn_feat = self.bnneck(pooled)
+        return bn_feat

@@ -14,6 +14,7 @@ def get_train_transforms(height: int = 256, width: int = 128) -> Callable:
     imagenet_std = [0.229, 0.224, 0.225]
     return transforms.Compose([
         transforms.RandomHorizontalFlip(p=0.5),
+        transforms.Resize((height, width)),
         transforms.Pad(10),
         transforms.RandomCrop((height, width)),
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),

@@ -1,0 +1,13 @@
+# @package _global_
+# Inherit from base.yaml and override source/target dataset fields
+defaults:
+  - base.yaml
+
+source:
+  dataset: "dukemtmc"
+  data_root: "data/raw/dukemtmc"
+  num_classes: 702
+
+target:
+  dataset: "market1501"
+  data_root: "data/raw/market1501"

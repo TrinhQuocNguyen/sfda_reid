@@ -33,7 +33,7 @@ class SourceTrainer:
         self.cfg = cfg
         self.device = torch.device(cfg.device)
         self.writer = SummaryWriter(log_dir=f"outputs/runs/source_{cfg.source.dataset}")
-        self.logger = logging.getLogger("SourceTrainer")
+        self.logger = logging.getLogger("train")
         self.criterion_ce = nn.CrossEntropyLoss(label_smoothing=0.1)
         from ..losses.contrastive import SupConLoss
         self.criterion_supcon = SupConLoss(temperature=cfg.memory_bank.temperature)

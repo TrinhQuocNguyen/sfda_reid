@@ -94,7 +94,7 @@ def main():
     
     # Market1501
     try:
-        test_dataset(Market1501, '/mnt/AIProjects/trinh/DATA/reid/Market1501', 'Market1501')
+        test_dataset(Market1501, '/old/home/ccvn/Workspace/trinh/data/reidMarket1501', 'Market1501')
     except Exception as e:
         print(f"✗ Market1501 test FAILED: {e}")
         import traceback
@@ -102,7 +102,7 @@ def main():
     
     # DukeMTMC
     try:
-        test_dataset(DukeMTMC, '/mnt/AIProjects/trinh/DATA/reid/DukeMTMC-reID', 'DukeMTMC')
+        test_dataset(DukeMTMC, '/old/home/ccvn/Workspace/trinh/data/reidDukeMTMC-reID', 'DukeMTMC')
     except Exception as e:
         print(f"✗ DukeMTMC test FAILED: {e}")
         import traceback
@@ -110,7 +110,7 @@ def main():
     
     # MSMT17
     try:
-        test_dataset(MSMT17, '/mnt/AIProjects/trinh/DATA/reid/MSMT17', 'MSMT17')
+        test_dataset(MSMT17, '/old/home/ccvn/Workspace/trinh/data/reidMSMT17', 'MSMT17')
     except Exception as e:
         print(f"✗ MSMT17 test FAILED: {e}")
         import traceback

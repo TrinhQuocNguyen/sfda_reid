@@ -6,7 +6,7 @@ from sfda_reid.data.datasets.market1501 import Market1501
 import numpy as np
 
 # Load training dataset
-dataset = Market1501('/mnt/AIProjects/trinh/DATA/reid/Market1501', mode='train')
+dataset = Market1501('/old/home/ccvn/Workspace/trinh/data/reidMarket1501', mode='train')
 pids = [s['pid'] for s in dataset.samples]
 
 print(f"Total samples: {len(pids)}")

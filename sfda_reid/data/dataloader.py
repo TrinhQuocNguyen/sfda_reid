@@ -54,13 +54,15 @@ def build_train_loader(dataset, cfg) -> DataLoader:
     Build DataLoader for training with RandomIdentitySampler.
     """
     sampler = RandomIdentitySampler(dataset, num_pids=16, num_instances=4)
-    return DataLoader(dataset, batch_size=cfg.source.batch_size, sampler=sampler, num_workers=cfg.num_workers, drop_last=True)
+    mp_context = 'spawn' if cfg.num_workers > 0 else None
+    return DataLoader(dataset, batch_size=cfg.source.batch_size, sampler=sampler, num_workers=cfg.num_workers, drop_last=True, multiprocessing_context=mp_context)
 
 def build_test_loader(dataset, cfg) -> DataLoader:
     """
     Build DataLoader for test/query/gallery with sequential sampling.
     """
-    return DataLoader(dataset, batch_size=256, shuffle=False, num_workers=cfg.num_workers)
+    mp_context = 'spawn' if cfg.num_workers > 0 else None
+    return DataLoader(dataset, batch_size=256, shuffle=False, num_workers=cfg.num_workers, multiprocessing_context=mp_context)
 
 def build_target_loader(dataset, cfg) -> DataLoader:
     """
@@ -72,4 +74,5 @@ def build_target_loader(dataset, cfg) -> DataLoader:
         camids = torch.tensor([item['camid'] for item in batch], dtype=torch.long)
         indices = torch.arange(len(batch), dtype=torch.long)
         return images, camids, indices
-    return DataLoader(dataset, batch_size=cfg.target.batch_size, shuffle=True, num_workers=cfg.num_workers, collate_fn=collate_fn)
+    mp_context = 'spawn' if cfg.num_workers > 0 else None
+    return DataLoader(dataset, batch_size=cfg.target.batch_size, shuffle=True, num_workers=cfg.num_workers, collate_fn=collate_fn, multiprocessing_context=mp_context)

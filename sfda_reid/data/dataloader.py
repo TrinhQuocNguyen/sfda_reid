@@ -4,6 +4,39 @@ from typing import Any, List, Dict
 import random
 import numpy as np
 
+def _train_collate_fn(batch):
+    """Collate function for training data that returns dict format."""
+    images = torch.stack([item['image'] for item in batch])
+    pids = torch.tensor([item['pid'] for item in batch], dtype=torch.long)
+    camids = torch.tensor([item['camid'] for item in batch], dtype=torch.long)
+    img_paths = [item.get('img_path', '') for item in batch]
+    return {
+        'image': images,
+        'pid': pids,
+        'camid': camids,
+        'img_path': img_paths
+    }
+
+def _test_collate_fn(batch):
+    """Collate function for test/query/gallery data that returns dict format."""
+    images = torch.stack([item['image'] for item in batch])
+    pids = torch.tensor([item['pid'] for item in batch], dtype=torch.long)
+    camids = torch.tensor([item['camid'] for item in batch], dtype=torch.long)
+    img_paths = [item.get('img_path', '') for item in batch]
+    return {
+        'image': images,
+        'pid': pids,
+        'camid': camids,
+        'img_path': img_paths
+    }
+
+def _target_collate_fn(batch):
+    """Collate function for unlabeled target data."""
+    images = torch.stack([item['image'] for item in batch])
+    camids = torch.tensor([item['camid'] for item in batch], dtype=torch.long)
+    indices = torch.arange(len(batch), dtype=torch.long)
+    return images, camids, indices
+
 class RandomIdentitySampler(Sampler):
     """
     Randomly samples P identities, then K instances for each identity.
@@ -55,24 +88,22 @@ def build_train_loader(dataset, cfg) -> DataLoader:
     """
     sampler = RandomIdentitySampler(dataset, num_pids=16, num_instances=4)
     mp_context = 'spawn' if cfg.num_workers > 0 else None
-    return DataLoader(dataset, batch_size=cfg.source.batch_size, sampler=sampler, num_workers=cfg.num_workers, drop_last=True, multiprocessing_context=mp_context)
+    return DataLoader(dataset, batch_size=cfg.source.batch_size, sampler=sampler, num_workers=cfg.num_workers, 
+                      drop_last=True, collate_fn=_train_collate_fn, multiprocessing_context=mp_context)
 
 def build_test_loader(dataset, cfg) -> DataLoader:
     """
     Build DataLoader for test/query/gallery with sequential sampling.
     """
     mp_context = 'spawn' if cfg.num_workers > 0 else None
-    return DataLoader(dataset, batch_size=256, shuffle=False, num_workers=cfg.num_workers, multiprocessing_context=mp_context)
+    return DataLoader(dataset, batch_size=256, shuffle=False, num_workers=cfg.num_workers, 
+                      collate_fn=_test_collate_fn, multiprocessing_context=mp_context)
 
 def build_target_loader(dataset, cfg) -> DataLoader:
     """
     Build DataLoader for unlabeled target training images.
     Returns image, camera ID, image index.
     """
-    def collate_fn(batch):
-        images = torch.stack([item['image'] for item in batch])
-        camids = torch.tensor([item['camid'] for item in batch], dtype=torch.long)
-        indices = torch.arange(len(batch), dtype=torch.long)
-        return images, camids, indices
     mp_context = 'spawn' if cfg.num_workers > 0 else None
-    return DataLoader(dataset, batch_size=cfg.target.batch_size, shuffle=True, num_workers=cfg.num_workers, collate_fn=collate_fn, multiprocessing_context=mp_context)
+    return DataLoader(dataset, batch_size=cfg.target.batch_size, shuffle=True, num_workers=cfg.num_workers, 
+                      collate_fn=_target_collate_fn, multiprocessing_context=mp_context)

@@ -25,13 +25,32 @@ class ReIDEvaluator:
     def _extract_features(self, model: torch.nn.Module, loader) -> Tuple[torch.Tensor, List, List]:
         features, pids, camids = [], [], []
         model.eval()
+        
+        # Get model device
+        model_device = next(model.parameters()).device
+        
         with torch.no_grad():
             for batch in loader:
                 images = batch['image'] if isinstance(batch, dict) else batch[0]
-                feats = model.forward_inference(images.cuda() if torch.cuda.is_available() else images)
+                # Move images to model's device
+                images = images.to(model_device)
+                feats = model.forward_inference(images)
                 features.append(feats.cpu())
-                pids.extend(batch['pid'] if isinstance(batch, dict) else batch[1])
-                camids.extend(batch['camid'] if isinstance(batch, dict) else batch[2])
+                
+                # Handle pids and camids - convert tensors to list if needed
+                pids_batch = batch['pid'] if isinstance(batch, dict) else batch[1]
+                camids_batch = batch['camid'] if isinstance(batch, dict) else batch[2]
+                
+                if isinstance(pids_batch, torch.Tensor):
+                    pids.extend(pids_batch.cpu().numpy().tolist())
+                else:
+                    pids.extend(pids_batch if isinstance(pids_batch, list) else [pids_batch])
+                
+                if isinstance(camids_batch, torch.Tensor):
+                    camids.extend(camids_batch.cpu().numpy().tolist())
+                else:
+                    camids.extend(camids_batch if isinstance(camids_batch, list) else [camids_batch])
+        
         features = torch.cat(features, dim=0)
         return features, pids, camids
 
